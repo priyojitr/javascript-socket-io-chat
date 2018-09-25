@@ -1,31 +1,36 @@
 function sendMessage(event, socket) {
 	event.preventDefault();
+	// get username, channel & messages from UI
 	const channel =  document.getElementById('channel').value;
 	const message =  document.getElementById('message').value;
 	const username = document.getElementById('username').value;
+	// sending user data to client
 	socket.emit('message', {
 		channel,
 		message,
 		username
 	});
+	// updating UI client container element with the user data
 	let innerhtml= '';
  	const chatContainer = document.getElementById('chatContainer');
- 	const messageElement = document.createElement('div');
- 	messageElement.innerHTML = innerhtml +
+ 	const msgElm = document.createElement('div');
+ 	msgElm.innerHTML = innerhtml +
 		`<div class="card sent-message">
 			<div class="card-body">
 				<p class="card-text">Me : ${message}</p>
 			</div>
 		
 		</div>`;
-	messageElement.className = 'col-12';
-	chatContainer.insertBefore(messageElement,chatContainer.childNodes[0]);
+		msgElm.className = 'col-12';
+	chatContainer.insertBefore(msgElm,chatContainer.childNodes[0]);
 }
 
 function joinChannel(event, socket) {
 	event.preventDefault();
+	// get the channel name user provided
 	const channel =  document.getElementById('newchannel').value;
 	let joinChannels = channel.split(',');
+	// send the channel name list to be added
 	joinChannels.forEach(channel => {
 		socket.emit('joinChannel', {
 			channel: channel
@@ -35,8 +40,10 @@ function joinChannel(event, socket) {
 
 function leaveChannel(event, socket) {
 	event.preventDefault();
+	// get the channel name user provided
 	const channel =  document.getElementById('newchannel').value;
 	let joinChannels = channel.split(',');
+	// send the channel name list to be removed
 	joinChannels.forEach(channel => {
 		socket.emit('leaveChannel', {
 			channel: channel
@@ -45,6 +52,7 @@ function leaveChannel(event, socket) {
 }
 
 function onWelcomeMessageReceived(data) {
+	// display default welcome message to the user
 	let innerhtml= '';
 	const chatContainer = document.getElementById('chatContainer');
 	const messageElement = document.createElement('div');
@@ -60,6 +68,7 @@ function onWelcomeMessageReceived(data) {
 }
 
 function addToChannelList(channel){
+	// adding user to channels
 	var dropdown = document.getElementById('channelsList');
 	let options = document.createElement('option');
 	options.value = channel.channel;
@@ -67,30 +76,33 @@ function addToChannelList(channel){
 }
 
 function onNewMessageReceived(message) {
+	
 	let innerhtml= '';
 	const chatContainer = document.getElementById('chatContainer');
-	const messageElement = document.createElement('div');
-	messageElement.innerHTML = innerhtml +
-		`<div class="card sent-message">
-			<div class="card-body">
-				<p class="card-text">${message.username}: ${message.message}</p>
-			</div>
-		</div>`;
-	messageElement.className = 'col-12';
-	chatContainer.insertBefore(messageElement, chatContainer.childNodes[0]);
+	const msgElm = document.createElement('div');
+	msgElm.innerHTML = innerhtml +
+	`<div class="card sent-message">
+		<div class="card-body">
+			<p class="card-text">${message.username} : ${message.message}</p>
+		</div>
+	</div>`;
+	msgElm.className = 'col-12';
+	chatContainer.insertBefore(msgElm,chatContainer.childNodes[0]);
 }
 
 function onRemovedFromChannelReceived(channel) {
+	// removing user from channel
 	const alertContainer = document.getElementById('alertContainer');
 	let innerhtml='';
 	const alertElement = document.createElement('div');
 	alertElement.innerHTML= innerhtml +
 		`<div class="alert alert-success alert-dismissible fade show" role="alert">
-			You are removed to <strong>${channel.Channel}</strong> successfully!
+			You are removed from <strong>${channel.Channel}</strong> successfully!
 			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 				<span aria-hidden="true">&times;</span>
 			</button>
 		</div>`;
+	// updating container to remove channel
 	alertContainer.appendChild(alertElement);
 	let chname = channel.Channel;
 	var dropdown = document.getElementById('channelsList');
