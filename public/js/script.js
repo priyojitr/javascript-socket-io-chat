@@ -1,137 +1,141 @@
+let channelList = [];
+// send message
 function sendMessage(event, socket) {
-	event.preventDefault();
-	// get username, channel & messages from UI
-	const channel =  document.getElementById('channel').value;
-	const message =  document.getElementById('message').value;
-	const username = document.getElementById('username').value;
-	// sending user data to client
-	socket.emit('message', {
-		channel,
-		message,
-		username
-	});
-	// updating UI client container element with the user data
-	let innerhtml= '';
- 	const chatContainer = document.getElementById('chatContainer');
- 	const msgElm = document.createElement('div');
- 	msgElm.innerHTML = innerhtml +
-		`<div class="card sent-message">
-			<div class="card-body">
-				<p class="card-text">Me : ${message}</p>
-			</div>
-		
-		</div>`;
-		msgElm.className = 'col-12';
-	chatContainer.insertBefore(msgElm,chatContainer.childNodes[0]);
+    event.preventDefault();
+	const usernameInput = document.getElementById('username').value;
+	const usernameValue = usernameInput === '' ? 'Anonymous' : usernameInput;
+	const channelValue = document.getElementById('channel').value;
+	const messageValue = document.getElementById('message').value;
+	let divClass = document.createElement('div');
+	divClass.className = 'col-12';
+	let cardSentDiv = document.createElement('div');
+	cardSentDiv.className = 'card sent-message text-left';
+	divClass.appendChild(cardSentDiv);
+	let cardBodyDiv = document.createElement('div');
+	cardBodyDiv.className = 'card-body';
+	cardSentDiv.appendChild(cardBodyDiv);
+	let paragraphDiv = document.createElement('p');
+	paragraphDiv.className = 'card-text';
+	cardBodyDiv.appendChild(paragraphDiv);
+	let messageContent = document.createTextNode(`Me : ${messageValue}`);
+	paragraphDiv.appendChild(messageContent);
+	let chatContainer = document.getElementById('chatContainer');
+	chatContainer.appendChild(divClass);
+    chatContainer.insertBefore(divClass,chatContainer.firstChild);
+    let data = {
+        username: usernameValue,
+        channel: channelValue,
+        message: messageValue
+    };
+    socket.emit('message', data);
 }
 
+// join channel
 function joinChannel(event, socket) {
-	event.preventDefault();
-	// get the channel name user provided
-	const channel =  document.getElementById('newchannel').value;
-	let joinChannels = channel.split(',');
-	// send the channel name list to be added
-	joinChannels.forEach(channel => {
-		socket.emit('joinChannel', {
-			channel: channel
-		});
-	});
+    event.preventDefault();
+    const usernameInput = document.getElementById('username').value;
+    const usernameValue = usernameInput === '' ? 'Anonymous' : usernameInput;
+    const channelValue = document.getElementById('newChannel').value;
+    let data = {
+        username: usernameValue,
+        channel: channelValue
+    };
+    socket.emit('joinChannel', data);
 }
 
-function leaveChannel(event, socket) {
-	event.preventDefault();
-	// get the channel name user provided
-	const channel =  document.getElementById('newchannel').value;
-	let joinChannels = channel.split(',');
-	// send the channel name list to be removed
-	joinChannels.forEach(channel => {
-		socket.emit('leaveChannel', {
-			channel: channel
-		});
-	});
+//leave channel
+function leaveChannel(event, socket){
+    event.preventDefault();
+    const usernameInput = document.getElementById('username').value;
+    const usernameValue = usernameInput === '' ? 'Anonymous' : usernameInput;
+    const channelValue = document.getElementById('newChannel').value;
+    let data = {
+        username: usernameValue,
+        channel: channelValue
+    };
+    socket.emit('leaveChannel', data);
 }
 
+// welcome message
 function onWelcomeMessageReceived(data) {
-	// display default welcome message to the user
-	let innerhtml= '';
-	const chatContainer = document.getElementById('chatContainer');
-	const messageElement = document.createElement('div');
-	messageElement.innerHTML = innerhtml +
-		`<div class="col-12">
-			<div class="card received-message">
-				<div class="card-body">
-					<p class="card-text">System : ${data}</p>
-				</div>
-			</div>
-		</div>`;
-	chatContainer.appendChild(messageElement);
+	let divClass = document.createElement('div');
+	divClass.className = 'col-12';
+	let cardReceivedDiv = document.createElement('div');
+	cardReceivedDiv.className = 'card received-message';
+	divClass.appendChild(cardReceivedDiv);
+	let cardBodyDiv = document.createElement('div');
+	cardBodyDiv.className = 'card-body';
+	cardReceivedDiv.appendChild(cardBodyDiv);
+	let paragraphDiv = document.createElement('p');
+	paragraphDiv.className = 'card-text';
+	cardBodyDiv.appendChild(paragraphDiv);
+	let messageContent = document.createTextNode(`System : ${data}`);
+	paragraphDiv.appendChild(messageContent);
+	document.getElementById('chatContainer').appendChild(divClass);
 }
 
-function addToChannelList(channel){
-	// adding user to channels
-	var dropdown = document.getElementById('channelsList');
-	let options = document.createElement('option');
-	options.value = channel.channel;
-	dropdown.appendChild(options);
+// when new message received
+function onNewMessageReceived(data) {
+	let divClass = document.createElement('div');
+	divClass.className = 'col-12';
+	let cardReceivedDiv = document.createElement('div');
+	cardReceivedDiv.className = 'card received-message text-right';
+	divClass.appendChild(cardReceivedDiv);
+	let cardBodyDiv = document.createElement('div');
+	cardBodyDiv.className = 'card-body';
+	cardReceivedDiv.appendChild(cardBodyDiv);
+	let paragraphDiv = document.createElement('p');
+	paragraphDiv.className = 'card-text';
+	cardBodyDiv.appendChild(paragraphDiv);
+	let messageContent = document.createTextNode(`${data.username} : ${data.message}`);
+	paragraphDiv.appendChild(messageContent);
+	let chatContainer = document.getElementById('chatContainer');
+	chatContainer.appendChild(divClass);
+	chatContainer.insertBefore(divClass,chatContainer.firstChild);
 }
 
-function onNewMessageReceived(message) {
-	
-	let innerhtml= '';
-	const chatContainer = document.getElementById('chatContainer');
-	const msgElm = document.createElement('div');
-	msgElm.innerHTML = innerhtml +
-	`<div class="card sent-message">
-		<div class="card-body">
-			<p class="card-text">${message.username} : ${message.message}</p>
-		</div>
-	</div>`;
-	msgElm.className = 'col-12';
-	chatContainer.insertBefore(msgElm,chatContainer.childNodes[0]);
-}
-
-function onRemovedFromChannelReceived(channel) {
-	// removing user from channel
-	const alertContainer = document.getElementById('alertContainer');
-	let innerhtml='';
-	const alertElement = document.createElement('div');
-	alertElement.innerHTML= innerhtml +
+// when added to new channel
+function onAddedToNewChannelReceived(data) {
+    const alertDiv = document.getElementById('alertContainer');
+	let alertDivContent = '';
+	alertDivContent = alertDivContent +
 		`<div class="alert alert-success alert-dismissible fade show" role="alert">
-			You are removed from <strong>${channel.Channel}</strong> successfully!
+			You are added to <strong>${data.channel}</strong> successfully!
 			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 				<span aria-hidden="true">&times;</span>
 			</button>
 		</div>`;
-	// updating container to remove channel
-	alertContainer.appendChild(alertElement);
-	let chname = channel.Channel;
-	var dropdown = document.getElementById('channelsList');
-	let options = dropdown.getElementsByTagName('option');
-	for(var i=0; i<options.length; i = i + 1){
-		if(options[i].value == chname){
-			dropdown.removeChild(options[i]);
-		}
-	}
-	options.value = '';
-	dropdown.appendChild(options);
+    alertDiv.innerHTML = alertDivContent;
+    let channelDropDown = document.getElementById('channelsList');
+	let channelContent = '';
+	channelList.push(data.channel);
+	channelList.map(channel => {
+		channelContent = channelContent +
+			`<option>${channel}</option>`;
+	});
+	channelDropDown.innerHTML = channelContent;
 }
 
-function alertMessage(channel){
-	const alertContainer = document.getElementById('alertContainer');
-	const alertElement = document.createElement('div');
-	alertElement.innerHTML =
+// when removed from channel
+function onRemovedFromChannelReceived(data) {
+    let alertDiv = document.getElementById('alertContainer');
+	let alertDivContent = '';
+	alertDivContent = alertDivContent +
 		`<div class="alert alert-success alert-dismissible fade show" role="alert">
-			You are added to <strong>${channel.channel}</strong> successfully!
+			You are removed to <strong>${data.channel}</strong> successfully!
 			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
 				<span aria-hidden="true">&times;</span>
 			</button>
-		</div>`;
-	alertContainer.appendChild(alertElement);
-}
-
-function onAddedToNewChannelReceived(channel) {
-	alertMessage(channel);
-	addToChannelList(channel);
+		</div>`
+    alertDiv.innerHTML = alertDivContent;
+    let channelDropDown = document.getElementById('channelsList');
+	let channelContent = '';
+	channelList.splice(channelList.indexOf(data.channel), 1);
+	channelList.map(channel => {
+		channelContent = channelContent +
+			`<option>${channel}</option>`;
+	});
+	channelDropDown.innerHTML = channelContent;
 }
 
 module.exports = {
@@ -143,9 +147,3 @@ module.exports = {
 	onAddedToNewChannelReceived,
 	onRemovedFromChannelReceived
 };
-
-// You will get error - Uncaught ReferenceError: module is not defined
-// while running this script on browser which you shall ignore
-// as this is required for testing purposes and shall not hinder
-// it's normal execution
-
