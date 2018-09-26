@@ -35,7 +35,7 @@ function joinChannel(event, socket) {
     event.preventDefault();
     const usernameInput = document.getElementById('username').value;
     const usernameValue = usernameInput === '' ? 'Anonymous' : usernameInput;
-    const channelValue = document.getElementById('newChannel').value;
+    const channelValue = document.getElementById('newchannel').value;
     let data = {
         username: usernameValue,
         channel: channelValue
@@ -48,7 +48,7 @@ function leaveChannel(event, socket){
     event.preventDefault();
     const usernameInput = document.getElementById('username').value;
     const usernameValue = usernameInput === '' ? 'Anonymous' : usernameInput;
-    const channelValue = document.getElementById('newChannel').value;
+    const channelValue = document.getElementById('newchannel').value;
     let data = {
         username: usernameValue,
         channel: channelValue
